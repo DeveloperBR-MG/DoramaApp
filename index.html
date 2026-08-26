@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>DoramaFlix</title>
+
+    <!-- Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <!-- =====================================
+         APP
+    ====================================== -->
+
+    <div id="app">
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <div class="logo">
+                <span>🎬</span>
+                <strong>DoramaFlix</strong>
+            </div>
+
+            <button
+                id="btnBack"
+                class="back-button hidden"
+                onclick="voltarCatalogo()"
+            >
+                ← Voltar
+            </button>
+
+        </header>
+
+
+        <!-- =====================================
+             CATÁLOGO
+        ====================================== -->
+
+        <main id="catalogo">
+
+            <section class="hero">
+
+                <div class="hero-content">
+
+                    <span class="hero-label">
+                        ✨ CATÁLOGO
+                    </span>
+
+                    <h1>
+                        Seus doramas favoritos
+                    </h1>
+
+                    <p>
+                        Escolha um dorama e tenha acesso ao conteúdo completo.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- BUSCA -->
+
+            <section class="search-area">
+
+                <div class="search-box">
+
+                    <span>🔎</span>
+
+                    <input
+                        id="searchInput"
+                        type="text"
+                        placeholder="Buscar dorama..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- CATEGORIAS -->
+
+            <section class="categories">
+
+                <button
+                    class="category active"
+                    onclick="filtrarCategoria('Todos', this)"
+                >
+                    Todos
+                </button>
+
+                <button
+                    class="category"
+                    onclick="filtrarCategoria('Romance', this)"
+                >
+                    Romance
+                </button>
+
+                <button
+                    class="category"
+                    onclick="filtrarCategoria('Drama', this)"
+                >
+                    Drama
+                </button>
+
+                <button
+                    class="category"
+                    onclick="filtrarCategoria('Comédia', this)"
+                >
+                    Comédia
+                </button>
+
+            </section>
+
+
+            <!-- CATÁLOGO -->
+
+            <section class="catalog-section">
+
+                <div class="section-title">
+
+                    <h2>
+                        Doramas
+                    </h2>
+
+                    <span id="contador">
+                        0 títulos
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="catalogGrid"
+                    class="catalog-grid"
+                ></div>
+
+
+                <div
+                    id="loading"
+                    class="loading"
+                >
+                    Carregando catálogo...
+                </div>
+
+
+                <div
+                    id="empty"
+                    class="empty hidden"
+                >
+                    <div>😢</div>
+
+                    <h3>
+                        Nenhum dorama encontrado
+                    </h3>
+
+                    <p>
+                        Tente outra busca.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =====================================
+             DETALHES
+        ====================================== -->
+
+        <main
+            id="detalhes"
+            class="details hidden"
+        >
+
+            <div
+                id="detailsBanner"
+                class="details-banner"
+            ></div>
+
+
+            <div class="details-content">
+
+                <div class="details-cover">
+
+                    <img
+                        id="detailsCover"
+                        src=""
+                        alt=""
+                    >
+
+                </div>
+
+
+                <div class="details-info">
+
+                    <span
+                        id="detailsCategory"
+                        class="details-category"
+                    ></span>
+
+                    <h1 id="detailsTitle"></h1>
+
+                    <div class="details-meta">
+
+                        <span id="detailsYear"></span>
+
+                        <span>•</span>
+
+                        <span id="detailsEpisodes"></span>
+
+                    </div>
+
+                    <p id="detailsDescription"></p>
+
+
+                    <div class="price-box">
+
+                        <span>
+                            Acesso completo
+                        </span>
+
+                        <strong id="detailsPrice">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+
+                    <button
+                        id="buyButton"
+                        class="buy-button"
+                        onclick="comprarDorama()"
+                    >
+                        🔓 Comprar acesso
+                    </button>
+
+
+                    <p class="payment-info">
+                        Pagamento seguro.
+                        Após a confirmação, o dorama completo será liberado.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- EPISÓDIOS -->
+
+            <section class="episodes-section">
+
+                <div class="section-title">
+
+                    <h2>
+                        Episódios
+                    </h2>
+
+                    <span id="episodeCount">
+                        0
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="episodesList"
+                    class="episodes-list"
+                ></div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================
+         JAVASCRIPT
+    ====================================== -->
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
