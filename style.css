@@ -807,8 +807,6 @@ body {
     background: #000;
 
 }
-
-
 /* =========================================
    PIX
 ========================================= */
@@ -819,7 +817,7 @@ body {
 
     inset: 0;
 
-    z-index: 9999;
+    z-index: 99999;
 
     display: flex;
 
@@ -830,10 +828,10 @@ body {
     padding: 20px;
 
     background:
-        rgba(0,0,0,.85);
+        rgba(0,0,0,.88);
 
     backdrop-filter:
-        blur(10px);
+        blur(8px);
 
 }
 
@@ -844,11 +842,7 @@ body {
 
     width: 100%;
 
-    max-width: 390px;
-
-    max-height: 90vh;
-
-    overflow-y: auto;
+    max-width: 380px;
 
     padding: 25px;
 
@@ -856,8 +850,7 @@ body {
 
     background: #15151c;
 
-    border:
-        1px solid var(--border);
+    border: 1px solid #292932;
 
     text-align: center;
 
@@ -868,9 +861,9 @@ body {
 
     position: absolute;
 
-    right: 12px;
-
     top: 10px;
+
+    right: 10px;
 
     width: 35px;
 
@@ -886,8 +879,6 @@ body {
 
     font-size: 22px;
 
-    cursor: pointer;
-
 }
 
 
@@ -895,49 +886,31 @@ body {
 
     font-size: 40px;
 
-    margin-bottom: 8px;
-
-}
-
-
-.pix-box h2 {
-
-    margin-bottom: 5px;
-
-}
-
-
-.pix-box > p {
-
-    color: var(--muted);
-
-    font-size: 13px;
-
 }
 
 
 .pix-valor {
 
-    margin: 15px 0;
+    display: block;
 
-    color: var(--primary);
+    margin: 15px;
 
-    font-size: 24px;
-
-    font-weight: 900;
+    font-size: 25px;
 
 }
 
 
-.pix-qrcode {
+.pix-imagem {
 
-    width: 238px;
+    display: block;
 
-    height: 238px;
+    width: 230px;
 
-    margin: 0 auto 15px;
+    height: 230px;
 
-    padding: 9px;
+    margin: 15px auto;
+
+    padding: 8px;
 
     background: white;
 
@@ -946,72 +919,63 @@ body {
 }
 
 
-.pix-qrcode img {
+.conteudo-bloqueado {
 
-    width: 220px;
+    text-align: center;
 
-    height: 220px;
+    padding: 30px 20px;
 
-}
+    border-radius: 15px;
 
-
-.pix-copy {
-
-    margin-top: 15px;
-
-}
-
-
-.pix-copy textarea {
-
-    width: 100%;
-
-    height: 80px;
-
-    resize: none;
-
-    padding: 10px;
-
-    border-radius: 10px;
+    background: var(--card);
 
     border: 1px solid var(--border);
 
-    background: #09090d;
+}
 
-    color: #aaa;
 
-    font-size: 10px;
+.bloqueio-icon {
+
+    font-size: 45px;
+
+    margin-bottom: 10px;
 
 }
 
 
-.pix-copy button {
+.acesso-ok {
 
-    width: 100%;
+    padding: 12px;
 
-    margin-top: 7px;
-
-    padding: 11px;
-
-    border: 0;
+    margin-bottom: 15px;
 
     border-radius: 10px;
 
-    background: #292932;
+    text-align: center;
 
-    color: white;
+    color: #4ade80;
 
-    cursor: pointer;
+    background: rgba(34,197,94,.12);
+
+    border: 1px solid rgba(34,197,94,.25);
+
+    font-weight: 800;
 
 }
 
 
-.pix-observacao {
+.dorama-video {
 
-    margin-top: 12px;
+    display: block;
 
-    font-size: 10px !important;
+    width: 100%;
 
-    color: #777 !important;
+    max-height: 75vh;
+
+    margin-top: 15px;
+
+    background: #000;
+
+    border-radius: 12px;
 
 }

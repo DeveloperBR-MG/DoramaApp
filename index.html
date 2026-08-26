@@ -436,12 +436,83 @@
     </div>
 
 </div>
+<!-- =====================================
+     MODAL PIX
+====================================== -->
 
+<div
+    id="pixModal"
+    class="pix-modal hidden"
+>
+
+    <div class="pix-box">
+
+        <button
+            class="pix-close"
+            onclick="fecharPix()"
+        >
+            ×
+        </button>
+
+
+        <div class="pix-icon">
+            💚
+        </div>
+
+
+        <h2>
+            Pagamento PIX
+        </h2>
+
+
+        <p id="pixDoramaNome"></p>
+
+
+        <strong
+            id="pixValor"
+            class="pix-valor"
+        >
+            R$ 0,00
+        </strong>
+
+
+        <img
+            src="https://radiogospelmusic.com.br/bot/pix.png"
+            id="pixImagem"
+            class="pix-imagem"
+            alt="QR Code PIX"
+        >
+
+
+        <p>
+            Faça o pagamento pelo QR Code.
+        </p>
+
+
+        <button
+            class="buy-button"
+            onclick="jaPaguei()"
+        >
+            ✅ Já paguei
+        </button>
+
+
+        <p
+            id="pixStatus"
+            class="payment-info"
+        ></p>
+
+    </div>
+
+</div>
 
     <!-- =====================================
          JAVASCRIPT
     ====================================== -->
 
+
+
+    
     <script src="app.js"></script>
 
 </body>

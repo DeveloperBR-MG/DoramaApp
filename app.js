@@ -472,88 +472,23 @@ function preencherDetalhes() {
 // CARREGAR EPISÓDIOS
 // =============================================
 
-async function carregarEpisodios(doramaId) {
+async function carregarEpisodios(
+    doramaId
+) {
 
-    try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
-
-            .from("episodios")
-
-            .select("*")
-
-            .eq(
-                "dorama_id",
-                doramaId
-            )
-
-            .eq(
-                "ativo",
-                true
-            )
-
-            .order(
-                "numero",
-                {
-                    ascending: true
-                }
-            );
+    document.getElementById(
+        "detailsEpisodes"
+    ).textContent =
+        "Dorama completo";
 
 
-        if (error) {
-            throw error;
-        }
+    document.getElementById(
+        "episodeCount"
+    ).textContent =
+        "Completo";
 
 
-        if (!data || !data.length) {
-
-            document.getElementById(
-                "videoTitulo"
-            ).textContent =
-                "Vídeo ainda não cadastrado.";
-
-            return;
-
-        }
-
-
-        // Primeiro registro = dorama completo
-
-        const episodio =
-            data[0];
-
-
-        window.doramaVideo =
-            episodio;
-
-
-        document.getElementById(
-            "detailsEpisodes"
-        ).textContent =
-            "Dorama completo";
-
-
-        document.getElementById(
-            "episodeCount"
-        ).textContent =
-            "1 vídeo";
-
-
-        verificarAcesso();
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Erro ao carregar vídeo:",
-            error
-        );
-
-    }
+    await verificarAcessoDorama();
 
 }
 
@@ -895,14 +830,14 @@ async function comprarDorama() {
     }
 
 
-    const pix =
-        doramaAtual.pix_copia_cola;
+    const usuario =
+        obterUsuarioTelegram();
 
 
-    if (!pix) {
+    if (!usuario) {
 
         mostrarMensagem(
-            "PIX ainda não configurado para este dorama."
+            "Abra o catálogo pelo Telegram."
         );
 
         return;
@@ -910,34 +845,7 @@ async function comprarDorama() {
     }
 
 
-    document.getElementById(
-        "pixDoramaNome"
-    ).textContent =
-        doramaAtual.titulo;
-
-
-    document.getElementById(
-        "pixValor"
-    ).textContent =
-        formatarPreco(
-            doramaAtual.preco
-        );
-
-
-    document.getElementById(
-        "pixCodigo"
-    ).value =
-        pix;
-
-
-    document.getElementById(
-        "pixModal"
-    ).classList.remove(
-        "hidden"
-    );
-
-
-    gerarQRCode(pix);
+    abrirPix();
 
 }
 
@@ -1110,5 +1018,368 @@ async function confirmarPagamento() {
         verificarAcesso,
         1500
     );
+
+}
+
+function abrirPix() {
+
+    document.getElementById(
+        "pixDoramaNome"
+    ).textContent =
+        doramaAtual.titulo;
+
+
+    document.getElementById(
+        "pixValor"
+    ).textContent =
+        formatarPreco(
+            doramaAtual.preco
+        );
+
+
+    document.getElementById(
+        "pixStatus"
+    ).textContent = "";
+
+
+    document.getElementById(
+        "pixModal"
+    ).classList.remove(
+        "hidden"
+    );
+
+}
+
+
+function fecharPix() {
+
+    document.getElementById(
+        "pixModal"
+    ).classList.add(
+        "hidden"
+    );
+
+}
+async function jaPaguei() {
+
+    const usuario =
+        obterUsuarioTelegram();
+
+
+    if (!usuario) {
+
+        mostrarMensagem(
+            "Abra o catálogo pelo Telegram."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !window.Telegram ||
+        !Telegram.WebApp
+    ) {
+
+        mostrarMensagem(
+            "Abra o sistema pelo Telegram."
+        );
+
+        return;
+
+    }
+
+
+    const status =
+        document.getElementById(
+            "pixStatus"
+        );
+
+
+    status.textContent =
+        "⏳ Enviando solicitação...";
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                "https://radiogospelmusic.com.br/bot/pagamento.php",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            initData:
+                                Telegram.WebApp
+                                    .initData,
+
+                            dorama_id:
+                                doramaAtual.id
+
+                        })
+
+                }
+            );
+
+
+        const resultado =
+            await resposta.json();
+
+
+        if (!resultado.ok) {
+
+            throw new Error(
+                resultado.mensagem ||
+                "Erro."
+            );
+
+        }
+
+
+        status.textContent =
+            "✅ Solicitação enviada! " +
+            "Aguarde a confirmação.";
+
+
+        mostrarMensagem(
+            "✅ Solicitação enviada!\n\n" +
+            "Assim que o pagamento for conferido, " +
+            "seu dorama será liberado."
+        );
+
+
+    }
+
+    catch (erro) {
+
+        console.error(erro);
+
+
+        status.textContent =
+            "❌ Não foi possível enviar.";
+
+
+        mostrarMensagem(
+            "Não foi possível registrar " +
+            "a solicitação."
+        );
+
+    }
+
+}
+
+async function verificarAcessoDorama() {
+
+    const usuario =
+        obterUsuarioTelegram();
+
+
+    if (!usuario || !doramaAtual) {
+
+        mostrarBloqueado();
+
+        return false;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.rpc(
+            "tem_acesso_dorama",
+            {
+
+                p_telegram_id:
+                    String(usuario.id),
+
+                p_dorama_id:
+                    Number(doramaAtual.id)
+
+            }
+        );
+
+
+    if (error) {
+
+        console.error(error);
+
+        mostrarBloqueado();
+
+        return false;
+
+    }
+
+
+    if (data === true) {
+
+        mostrarVideoCompleto();
+
+        return true;
+
+    }
+
+
+    mostrarBloqueado();
+
+    return false;
+
+}
+
+function mostrarVideoCompleto() {
+
+    const lista =
+        document.getElementById(
+            "episodesList"
+        );
+
+
+    lista.innerHTML = `
+
+        <div class="video-liberado">
+
+            <div class="acesso-ok">
+
+                🔓 DORAMA LIBERADO
+
+            </div>
+
+
+            <h3>
+
+                ▶ ${escaparHTML(
+                    doramaAtual.titulo
+                )}
+
+            </h3>
+
+
+            <video
+                id="doramaVideo"
+                controls
+                playsinline
+                preload="metadata"
+                class="dorama-video"
+            ></video>
+
+        </div>
+
+    `;
+
+
+    carregarVideoCompleto();
+
+}
+
+async function carregarVideoCompleto() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from("episodios")
+
+            .select(
+                "video_url,titulo"
+            )
+
+            .eq(
+                "dorama_id",
+                doramaAtual.id
+            )
+
+            .eq(
+                "ativo",
+                true
+            )
+
+            .order(
+                "numero",
+                {
+                    ascending: true
+                }
+            )
+
+            .limit(1);
+
+
+    if (
+        error ||
+        !data ||
+        !data.length
+    ) {
+
+        mostrarMensagem(
+            "Vídeo ainda não cadastrado."
+        );
+
+        return;
+
+    }
+
+
+    const video =
+        document.getElementById(
+            "doramaVideo"
+        );
+
+
+    video.src =
+        data[0].video_url;
+
+}
+
+function mostrarBloqueado() {
+
+    const lista =
+        document.getElementById(
+            "episodesList"
+        );
+
+
+    lista.innerHTML = `
+
+        <div class="conteudo-bloqueado">
+
+            <div class="bloqueio-icon">
+                🔒
+            </div>
+
+
+            <h3>
+                Dorama bloqueado
+            </h3>
+
+
+            <p>
+                Faça o pagamento para
+                assistir ao dorama completo.
+            </p>
+
+
+            <button
+                class="buy-button"
+                onclick="comprarDorama()"
+            >
+                💰 Comprar acesso
+            </button>
+
+        </div>
+
+    `;
 
 }
