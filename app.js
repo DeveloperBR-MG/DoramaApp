@@ -1178,6 +1178,60 @@ async function comprarDorama() {
 // CONFIRMAR PAGAMENTO
 // ============================================================
 
+async function consultarStatusBackend(telegramId, doramaId, orderId) {
+
+    try {
+
+        const corpo = {};
+        if (orderId) {
+            corpo.order_id = String(orderId);
+        } else {
+            corpo.telegram_id = String(telegramId);
+            corpo.dorama_id = Number(doramaId);
+        }
+
+        const resposta = await fetch(
+            "https://radiogospelmusic.com.br/bot/dorama/verificar_status_pagamento.php",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify(corpo)
+            }
+        );
+
+        const texto = await resposta.text();
+        let dados;
+
+        try {
+            dados = JSON.parse(texto);
+        } catch (e) {
+            console.error(
+                "verificar_status_pagamento.php não retornou JSON:",
+                texto
+            );
+            return {
+                sucesso: false,
+                acesso_liberado: false,
+                erro: "Resposta inválida do servidor"
+            };
+        }
+
+        return dados;
+
+    } catch (erro) {
+        console.error("Erro consultarStatusBackend:", erro);
+        return {
+            sucesso: false,
+            acesso_liberado: false,
+            erro: erro.message
+        };
+    }
+
+}
+
 async function confirmarPagamento() {
 
     if (!doramaAtual) {
@@ -1203,11 +1257,55 @@ async function confirmarPagamento() {
 
 
     mostrarMensagem(
-        "⏳ Verificando pagamento..."
+        "⏳ Verificando pagamento diretamente no Mercado Pago...\n\n" +
+        "Isso pode levar alguns segundos."
     );
 
 
     try {
+
+        const resultadoBackend =
+            await consultarStatusBackend(
+                usuario.id,
+                doramaAtual.id,
+                compraAtual ? compraAtual.order_id : null
+            );
+
+        if (resultadoBackend && resultadoBackend.sucesso) {
+
+            if (
+                resultadoBackend.acesso_liberado === true ||
+                resultadoBackend.status_compra === 'approved'
+            ) {
+                await finalizarPagamentoConfirmado();
+                return;
+            }
+
+            if (
+                resultadoBackend.status_compra === 'rejected' ||
+                resultadoBackend.status_compra === 'cancelled' ||
+                resultadoBackend.status_compra === 'refunded'
+            ) {
+                pararMonitoramentoPagamento();
+                mostrarMensagem(
+                    "❌ Pagamento não aprovado.\n\n" +
+                    "Status: " + resultadoBackend.status_compra + "\n\n" +
+                    "Gere um novo PIX ou entre em contato."
+                );
+                return;
+            }
+
+            mostrarMensagem(
+                "⏳ O pagamento ainda não foi confirmado pelo Mercado Pago.\n\n" +
+                "Status atual: " + (resultadoBackend.status_mercado_pago || resultadoBackend.status_compra || "pendente") + "\n\n" +
+                "Se você já pagou, aguarde alguns segundos e clique novamente em " +
+                "\"Já fiz o pagamento\".\n\n" +
+                "O app também verifica automaticamente a cada 5 segundos."
+            );
+
+            return;
+        }
+
 
         const {
             data,
@@ -1359,6 +1457,33 @@ async function verificarAcessoDorama() {
 
 
     try {
+
+        if (compraAtual && (compraAtual.order_id || compraAtual.payment_id)) {
+            try {
+                const resultadoBackend =
+                    await consultarStatusBackend(
+                        usuario.id,
+                        doramaAtual.id,
+                        compraAtual.order_id || null
+                    );
+
+                if (resultadoBackend && resultadoBackend.sucesso) {
+                    if (
+                        resultadoBackend.acesso_liberado === true ||
+                        resultadoBackend.status_compra === 'approved'
+                    ) {
+                        await mostrarVideoCompleto();
+                        return true;
+                    }
+                }
+            } catch (eBackend) {
+                console.error(
+                    "Polling: erro ao consultar backend, tentando RPC...",
+                    eBackend
+                );
+            }
+        }
+
 
         const {
             data,
