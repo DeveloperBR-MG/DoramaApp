@@ -910,7 +910,7 @@ async function comprarDorama() {
 
         const resposta =
             await fetch(
-                "https://radiogospelmusic.com.br/bot/criar_pix.php",
+                "https://radiogospelmusic.com.br/bot/dorama/criar_pix.php",
                 {
 
                     method: "POST",
