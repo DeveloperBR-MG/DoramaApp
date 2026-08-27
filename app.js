@@ -62,7 +62,7 @@ let compraAtual = null;
 
 const catalogGrid =
     document.getElementById("catalogGrid");
-
+a
 const loading =
     document.getElementById("loading");
 
