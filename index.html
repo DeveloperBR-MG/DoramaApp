@@ -12,23 +12,41 @@
 
     <title>DoramaFlix</title>
 
-    <!-- Telegram Mini App -->
+
+    <!-- =====================================
+         TELEGRAM MINI APP
+    ====================================== -->
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Supabase -->
+
+    <!-- =====================================
+         SUPABASE
+    ====================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- CSS -->
+
+    <!-- =====================================
+         CSS
+    ====================================== -->
+
     <link rel="stylesheet" href="style.css">
 
 
+    <!-- =====================================
+         QR CODE
+    ====================================== -->
+
     <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
-</script>
+        src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+    </script>
 
 </head>
 
+
 <body>
+
 
     <!-- =====================================
          APP
@@ -36,14 +54,21 @@
 
     <div id="app">
 
-        <!-- HEADER -->
+
+        <!-- =====================================
+             HEADER
+        ====================================== -->
 
         <header class="header">
 
             <div class="logo">
+
                 <span>🎬</span>
+
                 <strong>DoramaFlix</strong>
+
             </div>
+
 
             <button
                 id="btnBack"
@@ -56,11 +81,15 @@
         </header>
 
 
+
         <!-- =====================================
              CATÁLOGO
         ====================================== -->
 
         <main id="catalogo">
+
+
+            <!-- HERO -->
 
             <section class="hero">
 
@@ -70,9 +99,11 @@
                         ✨ CATÁLOGO
                     </span>
 
+
                     <h1>
                         Seus doramas favoritos
                     </h1>
+
 
                     <p>
                         Escolha um dorama e tenha acesso ao conteúdo completo.
@@ -83,7 +114,10 @@
             </section>
 
 
-            <!-- BUSCA -->
+
+            <!-- =====================================
+                 BUSCA
+            ====================================== -->
 
             <section class="search-area">
 
@@ -103,9 +137,13 @@
             </section>
 
 
-            <!-- CATEGORIAS -->
+
+            <!-- =====================================
+                 CATEGORIAS
+            ====================================== -->
 
             <section class="categories">
+
 
                 <button
                     class="category active"
@@ -114,12 +152,14 @@
                     Todos
                 </button>
 
+
                 <button
                     class="category"
                     onclick="filtrarCategoria('Romance', this)"
                 >
                     Romance
                 </button>
+
 
                 <button
                     class="category"
@@ -128,6 +168,7 @@
                     Drama
                 </button>
 
+
                 <button
                     class="category"
                     onclick="filtrarCategoria('Comédia', this)"
@@ -135,18 +176,24 @@
                     Comédia
                 </button>
 
+
             </section>
 
 
-            <!-- CATÁLOGO -->
+
+            <!-- =====================================
+                 CATÁLOGO
+            ====================================== -->
 
             <section class="catalog-section">
+
 
                 <div class="section-title">
 
                     <h2>
                         Doramas
                     </h2>
+
 
                     <span id="contador">
                         0 títulos
@@ -155,10 +202,12 @@
                 </div>
 
 
+
                 <div
                     id="catalogGrid"
                     class="catalog-grid"
                 ></div>
+
 
 
                 <div
@@ -169,15 +218,21 @@
                 </div>
 
 
+
                 <div
                     id="empty"
                     class="empty hidden"
                 >
-                    <div>😢</div>
+
+                    <div>
+                        😢
+                    </div>
+
 
                     <h3>
                         Nenhum dorama encontrado
                     </h3>
+
 
                     <p>
                         Tente outra busca.
@@ -185,9 +240,12 @@
 
                 </div>
 
+
             </section>
 
+
         </main>
+
 
 
         <!-- =====================================
@@ -199,13 +257,22 @@
             class="details hidden"
         >
 
+
+            <!-- BANNER -->
+
             <div
                 id="detailsBanner"
                 class="details-banner"
             ></div>
 
 
+
+            <!-- CONTEÚDO -->
+
             <div class="details-content">
+
+
+                <!-- CAPA -->
 
                 <div class="details-cover">
 
@@ -218,14 +285,20 @@
                 </div>
 
 
+
+                <!-- INFORMAÇÕES -->
+
                 <div class="details-info">
+
 
                     <span
                         id="detailsCategory"
                         class="details-category"
                     ></span>
 
+
                     <h1 id="detailsTitle"></h1>
+
 
                     <div class="details-meta">
 
@@ -237,8 +310,12 @@
 
                     </div>
 
+
                     <p id="detailsDescription"></p>
 
+
+
+                    <!-- PREÇO -->
 
                     <div class="price-box">
 
@@ -246,12 +323,16 @@
                             Acesso completo
                         </span>
 
+
                         <strong id="detailsPrice">
                             R$ 0,00
                         </strong>
 
                     </div>
 
+
+
+                    <!-- COMPRAR -->
 
                     <button
                         id="buyButton"
@@ -264,256 +345,260 @@
 
                     <p class="payment-info">
                         Pagamento seguro.
-                        Após a confirmação, o dorama completo será liberado.
+                        Após a confirmação,
+                        o dorama completo será liberado.
                     </p>
+
 
                 </div>
 
             </div>
 
 
+
             <!-- =====================================
-     DORAMA COMPLETO
-====================================== -->
+                 DORAMA COMPLETO
+            ====================================== -->
 
-<section class="episodes-section">
-
-    <div class="section-title">
-
-        <h2>
-            🎬 Dorama completo
-        </h2>
-
-        <span id="episodeCount">
-            1 vídeo
-        </span>
-
-    </div>
+            <section class="episodes-section">
 
 
-    <!-- BLOQUEADO -->
+                <div class="section-title">
 
-    <div
-        id="conteudoBloqueado"
-        class="conteudo-bloqueado"
-    >
-
-        <div class="bloqueio-icon">
-            🔒
-        </div>
-
-        <h3>
-            Conteúdo bloqueado
-        </h3>
-
-        <p>
-            Faça o pagamento para assistir
-            ao dorama completo.
-        </p>
-
-        <button
-            class="buy-button"
-            onclick="comprarDorama()"
-        >
-            💚 Pagar com PIX
-        </button>
-
-    </div>
+                    <h2>
+                        🎬 Dorama completo
+                    </h2>
 
 
-    <!-- LIBERADO -->
+                    <span id="episodeCount">
+                        1 vídeo
+                    </span>
 
-    <div
-        id="conteudoLiberado"
-        class="conteudo-liberado hidden"
-    >
-
-        <div class="acesso-liberado">
-
-            🔓 DORAMA LIBERADO
-
-        </div>
+                </div>
 
 
-        <h3 id="videoTitulo">
-            Dorama completo
-        </h3>
+
+                <!-- =================================
+                     BLOQUEADO
+                ================================== -->
+
+                <div
+                    id="conteudoBloqueado"
+                    class="conteudo-bloqueado"
+                >
 
 
-        <div
-            id="videoContainer"
-            class="video-container"
-        ></div>
-
-    </div>
-
-</section>
+                    <div class="bloqueio-icon">
+                        🔒
+                    </div>
 
 
-<!-- =====================================
-     MODAL PIX
-====================================== -->
-
-<div
-    id="pixModal"
-    class="pix-modal hidden"
->
-
-    <div class="pix-box">
-
-        <button
-            class="pix-close"
-            onclick="fecharPix()"
-        >
-            ×
-        </button>
+                    <h3>
+                        Conteúdo bloqueado
+                    </h3>
 
 
-        <div class="pix-icon">
-            💚
-        </div>
+                    <p>
+                        Faça o pagamento para assistir
+                        ao dorama completo.
+                    </p>
 
 
-        <h2>
-            Pagamento PIX
-        </h2>
+                    <button
+                        class="buy-button"
+                        onclick="comprarDorama()"
+                    >
+                        💚 Pagar com PIX
+                    </button>
 
 
-        <p id="pixDoramaNome"></p>
+                </div>
 
+
+
+                <!-- =================================
+                     LIBERADO
+                ================================== -->
+
+                <div
+                    id="conteudoLiberado"
+                    class="conteudo-liberado hidden"
+                >
+
+
+                    <div class="acesso-liberado">
+                        🔓 DORAMA LIBERADO
+                    </div>
+
+
+                    <h3 id="videoTitulo">
+                        Dorama completo
+                    </h3>
+
+
+                    <div
+                        id="videoContainer"
+                        class="video-container"
+                    ></div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+        </main>
+
+
+
+        <!-- =====================================
+             MODAL PIX
+             
+             APENAS UM MODAL
+             
+             O QR CODE SERÁ PREENCHIDO
+             PELO app.js
+        ====================================== -->
 
         <div
-            id="pixValor"
-            class="pix-valor"
+            id="pixModal"
+            class="pix-modal hidden"
         >
-            R$ 0,00
+
+
+            <div class="pix-box">
+
+
+                <!-- FECHAR -->
+
+                <button
+                    class="pix-close"
+                    onclick="fecharPix()"
+                >
+                    ×
+                </button>
+
+
+
+                <!-- ÍCONE -->
+
+                <div class="pix-icon">
+                    💚
+                </div>
+
+
+
+                <!-- TÍTULO -->
+
+                <h2>
+                    Pagamento PIX
+                </h2>
+
+
+
+                <!-- NOME DO DORAMA -->
+
+                <p id="pixDoramaNome"></p>
+
+
+
+                <!-- VALOR -->
+
+                <div
+                    id="pixValor"
+                    class="pix-valor"
+                >
+                    R$ 0,00
+                </div>
+
+
+
+                <!-- =================================
+                     QR CODE DINÂMICO
+                     
+                     O app.js coloca aqui o QR
+                     retornado pelo Mercado Pago.
+                ================================== -->
+
+                <div
+                    id="qrcode"
+                    class="pix-qrcode"
+                ></div>
+
+
+
+                <p>
+                    Escaneie o QR Code pelo
+                    aplicativo do seu banco.
+                </p>
+
+
+
+                <!-- =================================
+                     PIX COPIA E COLA
+                ================================== -->
+
+                <div class="pix-copy">
+
+
+                    <textarea
+                        id="pixCodigo"
+                        readonly
+                        placeholder="Gerando código PIX..."
+                    ></textarea>
+
+
+                    <button
+                        onclick="copiarPix()"
+                    >
+                        📋 Copiar PIX
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- =================================
+                     CONFIRMAR PAGAMENTO
+                ================================== -->
+
+                <button
+                    class="buy-button"
+                    onclick="confirmarPagamento()"
+                >
+                    ✅ Já fiz o pagamento
+                </button>
+
+
+
+                <p class="pix-observacao">
+
+                    Depois que o pagamento for confirmado,
+                    o dorama será liberado completo.
+
+                </p>
+
+
+            </div>
+
+
         </div>
 
 
-        <div
-            id="qrcode"
-            class="pix-qrcode"
-        ></div>
-
-
-        <p>
-            Escaneie o QR Code pelo
-            aplicativo do seu banco.
-        </p>
-
-
-        <div class="pix-copy">
-
-            <textarea
-                id="pixCodigo"
-                readonly
-            ></textarea>
-
-            <button
-                onclick="copiarPix()"
-            >
-                📋 Copiar PIX
-            </button>
-
-        </div>
-
-
-        <button
-            class="buy-button"
-            onclick="confirmarPagamento()"
-        >
-            ✅ Já fiz o pagamento
-        </button>
-
-
-        <p class="pix-observacao">
-
-            Depois que o pagamento for confirmado,
-            o dorama será liberado completo.
-
-        </p>
 
     </div>
 
-</div>
-<!-- =====================================
-     MODAL PIX
-====================================== -->
 
-<div
-    id="pixModal"
-    class="pix-modal hidden"
->
-
-    <div class="pix-box">
-
-        <button
-            class="pix-close"
-            onclick="fecharPix()"
-        >
-            ×
-        </button>
-
-
-        <div class="pix-icon">
-            💚
-        </div>
-
-
-        <h2>
-            Pagamento PIX
-        </h2>
-
-
-        <p id="pixDoramaNome"></p>
-
-
-        <strong
-            id="pixValor"
-            class="pix-valor"
-        >
-            R$ 0,00
-        </strong>
-
-
-        <img
-            src="https://radiogospelmusic.com.br/bot/pix.png"
-            id="pixImagem"
-            class="pix-imagem"
-            alt="QR Code PIX"
-        >
-
-
-        <p>
-            Faça o pagamento pelo QR Code.
-        </p>
-
-
-        <button
-            class="buy-button"
-            onclick="jaPaguei()"
-        >
-            ✅ Já paguei
-        </button>
-
-
-        <p
-            id="pixStatus"
-            class="payment-info"
-        ></p>
-
-    </div>
-
-</div>
 
     <!-- =====================================
          JAVASCRIPT
     ====================================== -->
 
-
-
-    
     <script src="app.js"></script>
+
 
 </body>
 
