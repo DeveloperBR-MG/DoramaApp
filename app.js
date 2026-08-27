@@ -62,7 +62,7 @@ let compraAtual = null;
 
 const catalogGrid =
     document.getElementById("catalogGrid");
-a
+
 const loading =
     document.getElementById("loading");
 
@@ -910,7 +910,7 @@ async function comprarDorama() {
 
         const resposta =
             await fetch(
-                "https://radiogospelmusic.com.br/bot/dorama/criar_pix.php",
+                "https://radiogospelmusic.com.br/bot/criar_pix.php",
                 {
 
                     method: "POST",
