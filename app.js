@@ -1273,39 +1273,18 @@ async function confirmarPagamento() {
                 compraAtual ? compraAtual.order_id : null
             );
 
-        if (resultadoBackend && resultadoBackend.sucesso) {
+        if (resultadoBackend && resultadoFoiSucesso(resultadoBackend)) {
 
-            if (
-                resultadoBackend.acesso_liberado === true ||
-                [
-                    "approved",
-                    "paid",
-                    "authorized"
-                ].includes(
-                    String(
-                        resultadoBackend.status_compra || ""
-                    ).toLowerCase()
-                )
-            ) {
+            if (pagamentoFoiAprovado(resultadoBackend)) {
                 await finalizarPagamentoConfirmado();
                 return;
             }
 
-            if (
-                [
-                    "rejected",
-                    "cancelled",
-                    "refunded"
-                ].includes(
-                    String(
-                        resultadoBackend.status_compra || ""
-                    ).toLowerCase()
-                )
-            ) {
+            if (pagamentoFoiRejeitado(resultadoBackend)) {
                 pararMonitoramentoPagamento();
                 mostrarMensagem(
                     "❌ Pagamento não aprovado.\n\n" +
-                    "Status: " + String(resultadoBackend.status_compra || "desconhecido") + "\n\n" +
+                    "Status: " + String(extrairStatusPagamento(resultadoBackend) || "desconhecido") + "\n\n" +
                     "Gere um novo PIX ou entre em contato."
                 );
                 return;
@@ -1359,6 +1338,163 @@ async function confirmarPagamento() {
 }
 
 
+function normalizarBooleano(valor) {
+
+    if (valor === true || valor === 1 || valor === "1") {
+        return true;
+    }
+
+    if (valor === false || valor === 0 || valor === "0") {
+        return false;
+    }
+
+    if (typeof valor === "string") {
+        return [
+            "true",
+            "yes",
+            "sim",
+            "approved",
+            "paid",
+            "authorized",
+            "aprovado",
+            "liberado",
+            "enabled"
+        ].includes(
+            valor.trim().toLowerCase()
+        );
+    }
+
+    return Boolean(valor);
+
+}
+
+
+function extrairStatusPagamento(resultado) {
+
+    if (!resultado) {
+        return "";
+    }
+
+    const candidatos = [
+        resultado.status_compra,
+        resultado.status_mercado_pago,
+        resultado.status,
+        resultado.data && resultado.data.status_compra,
+        resultado.data && resultado.data.status_mercado_pago,
+        resultado.data && resultado.data.status,
+        resultado.pagamento && resultado.pagamento.status,
+        resultado.payment && resultado.payment.status
+    ];
+
+    const valor = candidatos.find(
+        function (item) {
+            return item !== null && item !== undefined && item !== "";
+        }
+    );
+
+    return String(valor || "").trim().toLowerCase();
+
+}
+
+
+function extrairAcessoLiberado(resultado) {
+
+    if (!resultado) {
+        return false;
+    }
+
+    const candidatos = [
+        resultado.acesso_liberado,
+        resultado.liberado,
+        resultado.aprovado,
+        resultado.data && resultado.data.acesso_liberado,
+        resultado.data && resultado.data.liberado,
+        resultado.data && resultado.data.aprovado,
+        resultado.pagamento && resultado.pagamento.acesso_liberado,
+        resultado.pagamento && resultado.pagamento.aprovado,
+        resultado.payment && resultado.payment.acesso_liberado,
+        resultado.payment && resultado.payment.aprovado
+    ];
+
+    return candidatos.some(
+        function (valor) {
+            return normalizarBooleano(valor);
+        }
+    );
+
+}
+
+
+function resultadoFoiSucesso(resultado) {
+
+    if (!resultado) {
+        return false;
+    }
+
+    if (resultado.sucesso === true) {
+        return true;
+    }
+
+    if (typeof resultado.sucesso === "string") {
+        return normalizarBooleano(resultado.sucesso);
+    }
+
+    if (resultado.data && resultado.data.sucesso !== undefined) {
+        return normalizarBooleano(resultado.data.sucesso);
+    }
+
+    return true;
+
+}
+
+
+function pagamentoFoiAprovado(resultado) {
+
+    if (!resultado) {
+        return false;
+    }
+
+    if (extrairAcessoLiberado(resultado)) {
+        return true;
+    }
+
+    const status = extrairStatusPagamento(resultado);
+
+    return [
+        "approved",
+        "paid",
+        "authorized",
+        "aprovado",
+        "confirmed",
+        "completed",
+        "liberado",
+        "approved_pending",
+        "approved_pending_payment"
+    ].includes(status);
+
+}
+
+
+function pagamentoFoiRejeitado(resultado) {
+
+    if (!resultado) {
+        return false;
+    }
+
+    const status = extrairStatusPagamento(resultado);
+
+    return [
+        "rejected",
+        "cancelled",
+        "refunded",
+        "cancelado",
+        "recusado",
+        "reembolsado"
+    ].includes(status);
+
+}
+
+
 async function sincronizarAcessoDorama() {
 
     if (sincronizacaoAcessoEmAndamento) {
@@ -1391,19 +1527,8 @@ async function sincronizarAcessoDorama() {
 
         if (
             resultadoBackend &&
-            resultadoBackend.sucesso &&
-            (
-                resultadoBackend.acesso_liberado === true ||
-                [
-                    "approved",
-                    "paid",
-                    "authorized"
-                ].includes(
-                    String(
-                        resultadoBackend.status_compra || ""
-                    ).toLowerCase()
-                )
-            )
+            resultadoFoiSucesso(resultadoBackend) &&
+            pagamentoFoiAprovado(resultadoBackend)
         ) {
             await mostrarVideoCompleto();
             return true;
