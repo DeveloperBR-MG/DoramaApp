@@ -55,6 +55,8 @@ let doramaAtual = null;
 
 let compraAtual = null;
 
+let monitoramentoPagamento = null;
+
 
 // ============================================================
 // ELEMENTOS
@@ -761,6 +763,8 @@ function voltarCatalogo() {
     }
 
 
+    pararMonitoramentoPagamento();
+
     doramaAtual = null;
 
     compraAtual = null;
@@ -937,6 +941,11 @@ async function comprarDorama() {
                                 valor,
 
                             telegram_id:
+                                String(
+                                    usuario.id
+                                ),
+
+                            telegram_chat_id:
                                 String(
                                     usuario.id
                                 )
@@ -1134,6 +1143,8 @@ async function comprarDorama() {
             compraAtual
         );
 
+        iniciarMonitoramentoPagamento();
+
     }
 
     catch (erro) {
@@ -1237,16 +1248,7 @@ async function confirmarPagamento() {
 
         if (data === true) {
 
-            fecharPix();
-
-
-            await mostrarVideoCompleto();
-
-
-            mostrarMensagem(
-                "✅ Pagamento confirmado!\n\n" +
-                "O dorama foi liberado."
-            );
+            await finalizarPagamentoConfirmado();
 
 
             return;
@@ -1278,6 +1280,58 @@ async function confirmarPagamento() {
         );
 
     }
+
+}
+
+
+function iniciarMonitoramentoPagamento() {
+
+    if (monitoramentoPagamento || !doramaAtual) {
+        return;
+    }
+
+
+    monitoramentoPagamento = setInterval(
+        async function () {
+
+            if (await verificarAcessoDorama()) {
+
+                await finalizarPagamentoConfirmado();
+
+            }
+
+        },
+        5000
+    );
+
+}
+
+
+function pararMonitoramentoPagamento() {
+
+    if (monitoramentoPagamento) {
+
+        clearInterval(monitoramentoPagamento);
+
+        monitoramentoPagamento = null;
+
+    }
+
+}
+
+
+async function finalizarPagamentoConfirmado() {
+
+    pararMonitoramentoPagamento();
+
+    fecharPix();
+
+    await mostrarVideoCompleto();
+
+    mostrarMensagem(
+        "✅ Pagamento confirmado!\n\n" +
+        "O dorama foi liberado."
+    );
 
 }
 
@@ -1681,6 +1735,9 @@ function fecharPix() {
         );
 
     }
+
+
+    pararMonitoramentoPagamento();
 
 }
 
