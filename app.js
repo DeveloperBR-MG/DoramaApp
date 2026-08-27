@@ -57,6 +57,8 @@ let compraAtual = null;
 
 let monitoramentoPagamento = null;
 
+let sincronizacaoAcessoEmAndamento = false;
+
 
 // ============================================================
 // ELEMENTOS
@@ -1275,21 +1277,35 @@ async function confirmarPagamento() {
 
             if (
                 resultadoBackend.acesso_liberado === true ||
-                resultadoBackend.status_compra === 'approved'
+                [
+                    "approved",
+                    "paid",
+                    "authorized"
+                ].includes(
+                    String(
+                        resultadoBackend.status_compra || ""
+                    ).toLowerCase()
+                )
             ) {
                 await finalizarPagamentoConfirmado();
                 return;
             }
 
             if (
-                resultadoBackend.status_compra === 'rejected' ||
-                resultadoBackend.status_compra === 'cancelled' ||
-                resultadoBackend.status_compra === 'refunded'
+                [
+                    "rejected",
+                    "cancelled",
+                    "refunded"
+                ].includes(
+                    String(
+                        resultadoBackend.status_compra || ""
+                    ).toLowerCase()
+                )
             ) {
                 pararMonitoramentoPagamento();
                 mostrarMensagem(
                     "❌ Pagamento não aprovado.\n\n" +
-                    "Status: " + resultadoBackend.status_compra + "\n\n" +
+                    "Status: " + String(resultadoBackend.status_compra || "desconhecido") + "\n\n" +
                     "Gere um novo PIX ou entre em contato."
                 );
                 return;
@@ -1307,50 +1323,11 @@ async function confirmarPagamento() {
         }
 
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
+        const sincronizado =
+            await sincronizarAcessoDorama();
 
-                .rpc(
-                    "tem_acesso_dorama",
-                    {
-
-                        p_telegram_id:
-                            String(
-                                usuario.id
-                            ),
-
-                        p_dorama_id:
-                            Number(
-                                doramaAtual.id
-                            )
-
-                    }
-                );
-
-
-        if (error) {
-
-            console.error(
-                "Erro RPC:",
-                error
-            );
-
-
-            throw error;
-
-        }
-
-
-        if (data === true) {
-
-            await finalizarPagamentoConfirmado();
-
-
+        if (sincronizado) {
             return;
-
         }
 
 
@@ -1382,6 +1359,112 @@ async function confirmarPagamento() {
 }
 
 
+async function sincronizarAcessoDorama() {
+
+    if (sincronizacaoAcessoEmAndamento) {
+        return false;
+    }
+
+
+    const usuario =
+        obterUsuarioTelegram();
+
+
+    if (!usuario || !doramaAtual) {
+        mostrarBloqueado();
+        return false;
+    }
+
+
+    sincronizacaoAcessoEmAndamento = true;
+
+
+    try {
+
+        const resultadoBackend =
+            await consultarStatusBackend(
+                usuario.id,
+                doramaAtual.id,
+                compraAtual ? compraAtual.order_id : null
+            );
+
+
+        if (
+            resultadoBackend &&
+            resultadoBackend.sucesso &&
+            (
+                resultadoBackend.acesso_liberado === true ||
+                [
+                    "approved",
+                    "paid",
+                    "authorized"
+                ].includes(
+                    String(
+                        resultadoBackend.status_compra || ""
+                    ).toLowerCase()
+                )
+            )
+        ) {
+            await mostrarVideoCompleto();
+            return true;
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+
+                .rpc(
+                    "tem_acesso_dorama",
+                    {
+
+                        p_telegram_id:
+                            String(
+                                usuario.id
+                            ),
+
+                        p_dorama_id:
+                            Number(
+                                doramaAtual.id
+                            )
+
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "Erro ao sincronizar acesso:",
+                error
+            );
+
+            mostrarBloqueado();
+            return false;
+
+        }
+
+
+        if (data === true) {
+            await mostrarVideoCompleto();
+            return true;
+        }
+
+
+        mostrarBloqueado();
+        return false;
+
+    }
+
+    finally {
+        sincronizacaoAcessoEmAndamento = false;
+    }
+
+}
+
+
 function iniciarMonitoramentoPagamento() {
 
     if (monitoramentoPagamento || !doramaAtual) {
@@ -1392,7 +1475,7 @@ function iniciarMonitoramentoPagamento() {
     monitoramentoPagamento = setInterval(
         async function () {
 
-            if (await verificarAcessoDorama()) {
+            if (await sincronizarAcessoDorama()) {
 
                 await finalizarPagamentoConfirmado();
 
@@ -1440,121 +1523,7 @@ async function finalizarPagamentoConfirmado() {
 
 async function verificarAcessoDorama() {
 
-    const usuario =
-        obterUsuarioTelegram();
-
-
-    if (
-        !usuario ||
-        !doramaAtual
-    ) {
-
-        mostrarBloqueado();
-
-        return false;
-
-    }
-
-
-    try {
-
-        if (compraAtual && (compraAtual.order_id || compraAtual.payment_id)) {
-            try {
-                const resultadoBackend =
-                    await consultarStatusBackend(
-                        usuario.id,
-                        doramaAtual.id,
-                        compraAtual.order_id || null
-                    );
-
-                if (resultadoBackend && resultadoBackend.sucesso) {
-                    if (
-                        resultadoBackend.acesso_liberado === true ||
-                        resultadoBackend.status_compra === 'approved'
-                    ) {
-                        await mostrarVideoCompleto();
-                        return true;
-                    }
-                }
-            } catch (eBackend) {
-                console.error(
-                    "Polling: erro ao consultar backend, tentando RPC...",
-                    eBackend
-                );
-            }
-        }
-
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-
-                .rpc(
-                    "tem_acesso_dorama",
-                    {
-
-                        p_telegram_id:
-                            String(
-                                usuario.id
-                            ),
-
-                        p_dorama_id:
-                            Number(
-                                doramaAtual.id
-                            )
-
-                    }
-                );
-
-
-        if (error) {
-
-            console.error(
-                "Erro ao verificar acesso:",
-                error
-            );
-
-
-            mostrarBloqueado();
-
-
-            return false;
-
-        }
-
-
-        if (data === true) {
-
-            await mostrarVideoCompleto();
-
-
-            return true;
-
-        }
-
-
-        mostrarBloqueado();
-
-
-        return false;
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            erro
-        );
-
-
-        mostrarBloqueado();
-
-
-        return false;
-
-    }
+    return sincronizarAcessoDorama();
 
 }
 
