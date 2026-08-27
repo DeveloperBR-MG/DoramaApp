@@ -1092,23 +1092,286 @@ async function comprarDorama() {
         return;
     }
 
-
     const usuario =
         obterUsuarioTelegram();
-
 
     if (!usuario) {
 
         mostrarMensagem(
-            "Abra o catálogo pelo Telegram."
+            "Abra o DoramaFlix pelo Telegram para realizar a compra."
         );
 
         return;
+    }
+
+
+    const titulo =
+        doramaAtual.titulo;
+
+    const valor =
+        Number(
+            doramaAtual.preco || 0
+        );
+
+
+    if (valor <= 0) {
+
+        mostrarMensagem(
+            "Este dorama está sem preço cadastrado."
+        );
+
+        return;
+    }
+
+
+    const modal =
+        document.getElementById(
+            "pixModal"
+        );
+
+    const nome =
+        document.getElementById(
+            "pixDoramaNome"
+        );
+
+    const preco =
+        document.getElementById(
+            "pixValor"
+        );
+
+    const codigo =
+        document.getElementById(
+            "pixCodigo"
+        );
+
+    const qr =
+        document.getElementById(
+            "qrcode"
+        );
+
+
+    if (nome) {
+        nome.textContent =
+            titulo;
+    }
+
+
+    if (preco) {
+
+        preco.textContent =
+            formatarPreco(valor);
 
     }
 
 
-    abrirPix();
+    if (codigo) {
+        codigo.value =
+            "Gerando PIX...";
+    }
+
+
+    if (qr) {
+        qr.innerHTML =
+            "<p>Gerando QR Code...</p>";
+    }
+
+
+    if (modal) {
+        modal.classList.remove(
+            "hidden"
+        );
+    }
+
+
+    try {
+
+        /*
+        ---------------------------------------------------
+        URL DO SEU PHP
+        ---------------------------------------------------
+        */
+
+        const resposta =
+            await fetch(
+                "https://SEU-DOMINIO.com/dorama/criar_pix.php",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            dorama_id:
+                                Number(
+                                    doramaAtual.id
+                                ),
+
+                            titulo:
+                                titulo,
+
+                            valor:
+                                valor,
+
+                            telegram_id:
+                                String(
+                                    usuario.id
+                                )
+
+                        })
+
+                }
+            );
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (
+            !resposta.ok ||
+            !dados.sucesso
+        ) {
+
+            console.error(
+                "Erro PIX:",
+                dados
+            );
+
+            throw new Error(
+                dados.mensagem ||
+                "Não foi possível criar o PIX."
+            );
+
+        }
+
+
+        /*
+        ---------------------------------------------------
+        PIX COPIA E COLA
+        ---------------------------------------------------
+        */
+
+        if (codigo) {
+
+            codigo.value =
+                dados.qr_code || "";
+
+        }
+
+
+        /*
+        ---------------------------------------------------
+        QR CODE
+        ---------------------------------------------------
+        */
+
+        if (qr) {
+
+            qr.innerHTML = "";
+
+            if (
+                dados.qr_code_base64
+            ) {
+
+                const img =
+                    document.createElement(
+                        "img"
+                    );
+
+                img.src =
+                    "data:image/png;base64," +
+                    dados.qr_code_base64;
+
+                img.alt =
+                    "QR Code PIX";
+
+                img.className =
+                    "pix-imagem";
+
+                qr.appendChild(
+                    img
+                );
+
+            }
+            else if (
+                dados.qr_code
+            ) {
+
+                new QRCode(
+                    qr,
+                    {
+                        text:
+                            dados.qr_code,
+
+                        width: 260,
+
+                        height: 260
+                    }
+                );
+
+            }
+            else {
+
+                qr.innerHTML =
+                    "<p>QR Code não disponível.</p>";
+
+            }
+
+        }
+
+
+        /*
+        ---------------------------------------------------
+        GUARDAR DADOS DA COMPRA
+        ---------------------------------------------------
+        */
+
+        window.compraAtual = {
+
+            order_id:
+                dados.order_id,
+
+            payment_id:
+                dados.payment_id,
+
+            external_reference:
+                dados.external_reference,
+
+            dorama_id:
+                doramaAtual.id
+
+        };
+
+
+    }
+    catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        if (modal) {
+
+            modal.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        mostrarMensagem(
+            "Não foi possível gerar o PIX. Tente novamente."
+        );
+
+    }
 
 }
 
